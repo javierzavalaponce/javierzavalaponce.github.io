@@ -173,7 +173,12 @@
 <h2 id="dev-boards-nxp">Dev Boards NXP</h2>
 <ul>
 <li>Ambas FRDM-KL28Z (rojas) estan defectuosas, no permiten
-programacion. Estan bloqueadas</li>
+programacion. Estan bloqueadas.
+<ul>
+<li>El hardware se encuentra en un modo de seguridad parcial que impide
+la configuración de cualquier periférico, lo que la inutiliza por
+completo para fines de desarrollo y programación.</li>
+</ul></li>
 <li>FRDM - K64 - OK, toolchain instalado (GCC+cmake+Segger Jlink para
 debug)
 <ul>
@@ -187,8 +192,8 @@ Marzo 2026</li>
 </ul>
 <h2 id="tarjeta-dac7564">Tarjeta DAC7564</h2>
 <ul>
-<li>PCB defectuoso, falta conexion de pin12, este pin alimenta la logica
-digital, imposible que funcione asi</li>
+<li>Falta conexion de pin12, este pin alimenta la logica digital,
+imposible que funcione SPI</li>
 <li>Pregunta: : <strong>Es la unica version de HW?</strong></li>
 </ul>
 <h2 id="bison-y-flex">Bison y Flex</h2>
