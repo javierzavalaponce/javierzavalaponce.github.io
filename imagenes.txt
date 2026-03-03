@@ -1,0 +1,21 @@
+<figure style="text-align:center;">
+  <img src="./img/01.jpeg" alt="Error en PCB , pin flotado" style="display:block; margin:auto;">
+  <figcaption>Pin flotado, error en PCB</figcaption>
+</figure>
+
+<figure style="text-align:center;">
+  <img src="./img/02.jpeg" alt="pin flotado, error" style="display:block; margin:auto;">
+  <figcaption>Ubicacion de flotado en PCB</figcaption>
+</figure>
+
+<figure style="text-align:center;">
+  <img src="./img/03.jpeg" alt="Mi bench " style="display:block; margin:auto;">
+  <figcaption>Avances con FRDMK64</figcaption>
+</figure>
+
+<div style="text-align: center;">
+  <img src="./img/animacion.gif" alt="Animación RC">
+</div>
+
+
+
