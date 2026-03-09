@@ -5,7 +5,7 @@
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Javier Zavala" />
-  <meta name="dcterms.date" content="2026-03-03" />
+  <meta name="dcterms.date" content="2026-03-09" />
   <title>Reporte actividades</title>
   <style>
     html {
@@ -238,108 +238,92 @@
 <header id="title-block-header">
 <h1 class="title">Reporte actividades</h1>
 <p class="author">Javier Zavala</p>
-<p class="date">2026-03-03</p>
+<p class="date">2026-03-09</p>
 </header>
-<h1 id="actualizacion-2-marzo-2026">Actualizacion: 2 Marzo 2026</h1>
-<h2 id="dev-boards-nxp">Dev Boards NXP</h2>
-<ul>
-<li>Ambas FRDM-KL28Z (rojas) estan defectuosas, no permiten
-programacion. Estan bloqueadas.
-<ul>
-<li>En el caso de la ultima que me paso, el diagnostico es el siguiente:
-<strong>El hardware se encuentra en un modo de seguridad parcial que
-impide la configuración de cualquier periférico, lo que la inutiliza por
-completo para fines de desarrollo y programación.</strong></li>
-</ul></li>
-<li>Por lo cual, he seguido trabajando con la FRDM - K64, en resumen:
-<ul>
-<li>Toolchain instalado (GCC+cmake+Segger Jlink para debug) sobre Debian
-13</li>
-<li>Perifericos habilitados hasta ahora: GPIOS y UART</li>
-<li>Nota: el arbol de relojes es complicado sin los helpers del IDE
-oficial, ( <em>aun me falta profundizar en este modulo de cfg de
-reloj</em>)</li>
-<li><strong>Demo</strong> de avances programado para semana del 9-13
-Marzo 2026. Puedo presentar avances de lo que he logrado con esta
-board.</li>
-</ul></li>
-<li>Siguiente paso: integracion de FreeRTOS, evaluacion de Zephyr.</li>
-</ul>
-<hr />
-<h2 id="tarjeta-dac7564">Tarjeta DAC7564</h2>
-<ul>
-<li><strong>IMPORTANTE:</strong> Falta conexion de pin12, este pin
-alimenta la logica digital, imposible que funcione SPI interno. Señalo
-que he estado utilizando analizador lógico (Inclusive el documento de JL
-muestra el pin flotado)</li>
-<li>Pregunta: : <strong>Es la unica version de HW?</strong></li>
-</ul>
-<hr />
-<h2 id="bison-y-flex">Bison y Flex</h2>
-<ul>
-<li>En fase de aprendizaje</li>
-</ul>
-<hr />
-<h2 id="emulación-de-sistemas-dinámicos">Emulación de sistemas
-dinámicos</h2>
-<p>En paralelo, voy avanzando, (repasando y reafirmando ) conceptos, y
-desenpolvando mis libros.</p>
-<p>Antes de pasar a traductor a C, estoy usando python y ngspice, por
-ejemplo</p>
+<p>bitacora:</p>
+<a href="02mar2026.html">02mar2026</a>
+<h1 id="actualizacion-9-mar-2026">Actualizacion: 9 Mar 2026</h1>
+<h2 id="simulacion-de-rc">Simulacion de RC</h2>
 <div class="sourceCode" id="cb1"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ngspice rc.cir</span></code></pre></div>
-<p>Este es el contenido de rc.cir</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode perl"><code class="sourceCode perl"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a> <span class="ot">*</span> RC circuit simulation</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ot">*</span> R = <span class="dv">1</span>k Ohm</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ot">*</span> C = <span class="dv">100</span>uF</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>V1 in <span class="dv">0</span> PULSE(<span class="dv">0</span> <span class="dv">5</span> <span class="dv">0</span> <span class="dv">1</span>u <span class="dv">1</span>u <span class="dv">1</span> <span class="dv">2</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>R1 in out <span class="dv">1000</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>C1 out <span class="dv">0</span> <span class="dv">100</span>u</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>.tran <span class="fl">0.01</span> <span class="dv">1</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>.control</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>run</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>plot v(out)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>.endc</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>.end</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+class="sourceCode perl"><code class="sourceCode perl"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>                 R=<span class="dv">1</span>K     C=<span class="dv">100</span>uF</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>(entrada)x-&gt;+---<span class="ot">/\/\/\/\---</span><span class="ch">|</span><span class="ot"> </span><span class="ch">|</span><span class="ot">-----GND</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ot">                          </span><span class="ch">^</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ot">                          </span><span class="ch">|</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ot">                          y</span><span class="ch">(</span><span class="ot">salida</span><span class="ch">)</span></span></code></pre></div>
+<p>Si:</p>
+<p>y = voltage de capacitor</p>
+<p>i = Cy’</p>
+<p>x = entrada</p>
+<p>Entonces: x = RCy’ + y</p>
 <hr />
+<h2 id="en-python">En python:</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode perl"><code class="sourceCode perl"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">## simulacion de RC en python</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ot">y </span>= <span class="fl">0.0</span>; <span class="co">#salida</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>x = <span class="fl">5.0</span>; <span class="co">#entrada , aplica escalon de 5 Volts</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>RC = <span class="fl">0.1</span>;   <span class="co"># R 1K, C 100u</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>Ts = <span class="fl">0.002</span>; <span class="co"># Simula una muestra cada 2 ms </span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> i in range(<span class="dv">500</span>):</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="ot">y </span>= <span class="ot">y </span>+ (Ts/RC)*(x - y);</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    t = i<span class="dt">*Ts</span> <span class="co">#tiempo</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(f<span class="ot">&quot;</span><span class="st">{t:.4f},{y:.4f}</span><span class="ot">&quot;</span>)</span></code></pre></div>
+<hr />
+<h2 id="en-c-sore-arduino">En c sore arduino:</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> y <span class="op">=</span> <span class="fl">0.0</span><span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> x <span class="op">=</span> <span class="fl">5.0</span><span class="op">;</span> <span class="co">// Aplica escalon de 5 Volts</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> RC <span class="op">=</span> <span class="fl">0.1</span><span class="op">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> Ts <span class="op">=</span> <span class="fl">0.002</span><span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="dt">unsigned</span> <span class="dt">long</span> last <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> setup<span class="op">()</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    Serial<span class="op">.</span>begin<span class="op">(</span><span class="dv">115200</span><span class="op">);</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> loop<span class="op">()</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="op">{</span>   <span class="co">//toma una muestra cada 2 ms </span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>micros<span class="op">()</span> <span class="op">-</span> last <span class="op">&gt;=</span> <span class="dv">2000</span><span class="op">)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span>       </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        last <span class="op">=</span> micros<span class="op">();</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> y <span class="op">+</span> <span class="op">(</span>Ts<span class="op">/</span>RC<span class="op">)*(</span>x <span class="op">-</span> y<span class="op">);</span> <span class="co">//&lt;&lt;--AQUI!!!!</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        Serial<span class="op">.</span>print<span class="op">(</span>x<span class="op">);</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        Serial<span class="op">.</span>print<span class="op">(</span><span class="st">&quot;,&quot;</span><span class="op">);</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        Serial<span class="op">.</span>println<span class="op">(</span>y<span class="op">);</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode perl"><code class="sourceCode perl"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#asi para Graficar</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">import</span> serial</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">import</span> matplotlib.pyplot as plt</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>ser = serial.Serial(<span class="ot">&#39;</span><span class="ss">/dev/ttyUSB0</span><span class="ot">&#39;</span>,<span class="dv">115200</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>x=[]</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>y=[]</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> i in range(<span class="dv">500</span>):</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    line=ser.<span class="fu">readline</span>().decode().strip()</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="ot">y</span>.append(float(line))</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="ot">y</span>,color=<span class="ot">&quot;</span><span class="st">green</span><span class="ot">&quot;</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ot">&quot;</span><span class="st">Simulación Circuito RC en arduino</span><span class="ot">&quot;</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ot">&quot;</span><span class="st">file_arduino.png</span><span class="ot">&quot;</span>, dpi=<span class="dv">300</span>)</span></code></pre></div>
 <h2 id="imagenes">Imagenes</h2>
-<!--
-| Columna 1 | Columna 2 | Columna 3 |
-| :--- | :---: | ---: |
-| Izquierda | Centro | Derecha |
-| Fila 2 | Datos | Datos |
--->
 
 <figure style="text-align:center;">
-  <img src="./img/01.jpeg" alt="Error en PCB , pin flotado" style="display:block; margin:auto;">
-  <figcaption>Pin flotado, error en PCB</figcaption>
+  <img src="./img/04.png" alt="comparando RC en python y c " style="display:block; margin:auto;">
+  <figcaption>RC en python y en C</figcaption>
 </figure>
-
-<figure style="text-align:center;">
-  <img src="./img/02.jpeg" alt="pin flotado, error" style="display:block; margin:auto;">
-  <figcaption>Ubicacion de flotado en PCB</figcaption>
-</figure>
-
-<figure style="text-align:center;">
-  <img src="./img/03.jpeg" alt="Mi bench " style="display:block; margin:auto;">
-  <figcaption>Avances con FRDMK64</figcaption>
-</figure>
-
-<div style="text-align: center;">
-  <img src="./img/animacion.gif" alt="Animación RC">
-</div>
-
 
 
 </body>
 </html>
-
-
-
-
