@@ -272,7 +272,7 @@ class="sourceCode perl"><code class="sourceCode perl"><span id="cb2-1"><a href="
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    t = i<span class="dt">*Ts</span> <span class="co">#tiempo</span></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(f<span class="ot">&quot;</span><span class="st">{t:.4f},{y:.4f}</span><span class="ot">&quot;</span>)</span></code></pre></div>
 <hr />
-<h2 id="en-c-sore-arduino">En c sore arduino:</h2>
+<h2 id="en-c-sobre-arduino">En c sobre arduino:</h2>
 <div class="sourceCode" id="cb3"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> y <span class="op">=</span> <span class="fl">0.0</span><span class="op">;</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> x <span class="op">=</span> <span class="fl">5.0</span><span class="op">;</span> <span class="co">// Aplica escalon de 5 Volts</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -317,11 +317,101 @@ class="sourceCode perl"><code class="sourceCode perl"><span id="cb4-1"><a href="
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>plt.grid()</span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ot">&quot;</span><span class="st">file_arduino.png</span><span class="ot">&quot;</span>, dpi=<span class="dv">300</span>)</span></code></pre></div>
+<h2 id="respuesta-en-frecuencia-repaso">Respuesta en Frecuencia
+(repaso)</h2>
+<p>El siguiente script python muestra la respuesta en frecuencia, es
+decir que en vez de aplicar un escalon de 5Volts, se aplica como entrada
+una funcion seno de 5 Volts de amplitud y ademas se hace un barrido en
+frecuencia a fin de apreciar la respuesta en frecuencia del RC. se
+aplica 1Hz, 2Hz, 3Hz…10Hz tambien se calcula la ganancia y se compara
+con el valor teorico, todo con fines de <em>repaso y estudio
+solamente.</em></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode perl"><code class="sourceCode perl"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">import</span> math</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">import</span> numpy as np</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">import</span> pandas as pd</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">import</span> matplotlib.pyplot as plt</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>RC = <span class="fl">0.1</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>Ts = <span class="fl">0.002</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>A  = <span class="fl">5.0</span>  <span class="co"># Amplitud</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Vector de frecuencias</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>f = np.linspace(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">10</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Tiempo de simulación (500 puntos = 1 segundo)</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>t = np.arange(<span class="dv">0</span>, <span class="fl">1.0</span>, Ts)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Lista para almacenar todas las simulaciones y[]</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>Y_matrix = []</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>gain = []</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> i, freq in enumerate(f):</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    x = A <span class="ot">*</span> np.<span class="fu">sin</span>(<span class="dv">2</span> <span class="ot">*</span> np.pi <span class="ot">*</span> freq <span class="ot">*</span> t)  <span class="co"># Entrada seno (vector)</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="ot">y </span>= np.zeros_like(t)  <span class="co"># Estado inicial</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">for</span> n in range(<span class="dv">1</span>, len(t)):</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>            <span class="ot">y</span>[n] = <span class="ot">y</span>[n<span class="dv">-1</span>] + (Ts/RC) <span class="ot">*</span> (x[n] - <span class="ot">y</span>[n<span class="dv">-1</span>])  <span class="co"># Ecuación discreta RC</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    Y_matrix.append(y)  <span class="co"># Agregar fila completa</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    amp_out = (np.max(y) - np.min(y))/<span class="dv">2</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    gain.append(amp_out/A)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertir a matriz 10x500 y luego DataFrame</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>Y_array = np.array(Y_matrix)  <span class="co"># Shape: (10, 500)</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>df = pd.DataFrame(Y_array, </span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">index</span>=[f<span class="ot">&quot;</span><span class="st">Freq_{int(fi)}Hz</span><span class="ot">&quot;</span> <span class="kw">for</span> fi in f],</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>                  columns=[f<span class="ot">&quot;</span><span class="st">t_{i}</span><span class="ot">&quot;</span> <span class="kw">for</span> i in range(<span class="dv">500</span>)])</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="ot">&quot;</span><span class="st">Shape del DataFrame:</span><span class="ot">&quot;</span>, df.shape)</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(df.head())</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="co"># GRAFICAR: 10 curvas en mismo plot</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize=(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> freq_label in df.<span class="fu">index</span>:</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    plt.plot(t, df.loc[freq_label], label=freq_label, linewidth=<span class="dv">2</span>)</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="ot">&#39;</span><span class="ss">Tiempo [s]</span><span class="ot">&#39;</span>)</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="ot">&#39;</span><span class="ss">Voltaje salida [V]</span><span class="ot">&#39;</span>)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ot">&#39;</span><span class="ss">Respuesta en Frecuencia del Circuito RC\n(10 frecuencias 1-10 Hz)</span><span class="ot">&#39;</span>)</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>plt.grid(True, alpha=<span class="fl">0.3</span>)</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>plt.legend(bbox_to_anchor=(<span class="fl">1.05</span>, <span class="dv">1</span>), loc=<span class="ot">&#39;</span><span class="ss">upper left</span><span class="ot">&#39;</span>)</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ot">&quot;</span><span class="st">01.png</span><span class="ot">&quot;</span>, dpi=<span class="dv">300</span>)</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>f_theory = np.linspace(<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">200</span>)</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>H = <span class="dv">1</span>/np.<span class="fu">sqrt</span>(<span class="dv">1</span> + (<span class="dv">2</span><span class="dt">*np</span>.pi<span class="dt">*f_theory*RC</span>)**<span class="dv">2</span>)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>plt.plot(f, gain, <span class="ot">&#39;</span><span class="ss">o</span><span class="ot">&#39;</span>, label=<span class="ot">&quot;</span><span class="st">Simulación</span><span class="ot">&quot;</span>)</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>plt.plot(f_theory, H, label=<span class="ot">&quot;</span><span class="st">Teoría</span><span class="ot">&quot;</span>)</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="ot">&quot;</span><span class="st">Frecuencia [Hz]</span><span class="ot">&quot;</span>)</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="ot">&quot;</span><span class="st">Ganancia</span><span class="ot">&quot;</span>)</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ot">&quot;</span><span class="st">Respuesta en frecuencia del filtro RC</span><span class="ot">&quot;</span>)</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>plt.grid(True)</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="ot">&quot;</span><span class="st">02.png</span><span class="ot">&quot;</span>, dpi=<span class="dv">300</span>)</span></code></pre></div>
 <h2 id="imagenes">Imagenes</h2>
+
+
 
 <figure style="text-align:center;">
   <img src="./img/04.png" alt="comparando RC en python y c " style="display:block; margin:auto;">
   <figcaption>RC en python y en C</figcaption>
+</figure>
+
+
+<figure style="text-align:center;">
+  <img src="./img/05.png" alt="RC en python " style="display:block; margin:auto;">
+  <figcaption>barrido en frecuencia</figcaption>
+</figure>
+
+
+
+<figure style="text-align:center;">
+  <img src="./img/06.png" alt="RC en python" style="display:block; margin:auto;">
+  <figcaption>barrido en freecuencia</figcaption>
 </figure>
 
 
