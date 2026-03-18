@@ -10,13 +10,11 @@ bitacora:
 
 ## Emulador de sistemas dinamicos. Prototipo 0
 
-Reporte de implementacion de sistemas dinamicos.
-Primer prototipo.
-
 ## Descripcion del sistema
 
-Sistema basado en microcontrolador
-Entrada: señal de Audio tomada de PC
+Sistema basado en microcontrolador. Entrada: señal de Audio tomada de PC
+Frecuencia de muestreo, periodo de muestreo Ts = 1 ms
+Salida de datos por serial 115200, 8n1.
 
 **Acondicionamiento de señal**
 
@@ -26,10 +24,10 @@ Entrada: señal de Audio tomada de PC
                │
              [R1 4.5k]
                │
-               ●─────────> Vbias (~2.5V)
-               │           Conectado a pin A0
-Entrada ──||───┘           entrada a uControlador
-audio     10uF
+               |
+               │    hacia el ADC
+Entrada ──||───●──> Vbias (~2.5V) 
+audio     10uF |    entrada a uControlador
                │
              [R2 4.5k]
                │
@@ -41,9 +39,8 @@ audio     10uF
 * El audio queda *montado* sobre nivel Vbias.
 * Desde el punto de vista de la señal de audio, el audio ve un pasa altas.
     * Frecuencia de corte vista por la señal. Fc=1/(2πRC)
-    * Con R = 2.25kΩ , C = 100uF . Fc ~  7Hz
-    * Por encima de ~7 Hz → la señal pasa casi sin atenuación.
-
+    * Con R = 2.25kΩ , C = 100uF . Fc ~  7Hz (señales arriba de 7 Hz
+      pasan sin atenuación)
 
 **Diagrama a bloques**
 
@@ -54,15 +51,15 @@ audio     10uF
                 │ EMULADOR │
                 └──┬───────┘
                    │
-                serial ────> logs via serial 115200 bps 8n1
+                serial ────> logs via serial 
 ```
-* Frecuencia de **muestreo** fijada por Interrupion a **1KHhz**
+* Frecuencia de **muestreo** fijada por Interrupion de timer
+ a **1KHhz**
 
-**Señal de audio Chirp en Julia**
+**Generacion de archivo de audio chirp.wav en Julia**
 
 Este codigo genera una señal de audio para ejercitar
-el emulador, se trata de una chirp escalonada (con silencios) para barrer frecuencia y demostrar la funcionalidad de un RC emulado en uControlador
-
+el emulador, se trata de una chirp escalonada (con silencios) para barrer frecuencia y demostrar la funcionalidad de un RC emulado en uControlador.
 
 ```python
 using WAV
@@ -85,25 +82,15 @@ chirp_signal = vcat([
 # vector de tiempo global
 t = (0:length(chirp_signal)-1) ./ fs
 
-p = plot(t, chirp_signal,
-     xlabel="Tiempo (s)",
-     ylabel="Amplitud",
-     title="Barrido con silencios",
-     label="señal")
-
-savefig(p, "chirp.png")
-
 # guardar archivo WAV
 wavwrite(chirp_signal, "chirp.wav", Fs=fs)
-println(length(chirp_signal) / fs, " segundos")
 ```
 
 
-**Señal de audio Chirp en Julia**
+**Filtro RC en Julia: y[n] = y[n-1] + alpha * (x[n] - y[n-1])**
 
 ```python
 using WAV
-using Plots
 
 # Leer archivo
 x, fs = wavread("chirp.wav")
@@ -123,18 +110,14 @@ for n in 2:length(x)
     y[n] = y[n-1] + alpha * (x[n] - y[n-1])
 end
 
-# Graficar
-t = (0:length(x)-1) ./ fs
-plot(t, x, label="Entrada")
-plot!(t, y, label="Salida (RC)")
-
 # Guardar WAV
 wavwrite(y, "filtered.wav", Fs=fs)
 ```
-**Este es el filtro RC en julia:**
-**y[n] = y[n-1] + alpha * (x[n] - y[n-1])**
+
+---
 
 **Codigo C de RC**
+**y[n] = y[n-1] + alpha * (x[n] - y[n-1])**
 
 Solo se muestra la ISR ejecutada cada 1 ms
 
@@ -147,22 +130,27 @@ ISR(TIMER1_COMPA_vect)
   const float alpha = 0.2;
 
   // Alternar pin para medir con analizador lógico
+  // Tick de sistema de tiempo real
   signal = !signal;
   digitalWrite(LED_BUILTIN, signal ? HIGH : LOW);
 
-  // Leer ADC y aplicar filtro RC: y[n] = alpha * x[n] + (1 - alpha) * y[n-1]
   digitalWrite(12,HIGH);
   // Leer ADC
   x = analogRead(pinADC);
   //centrar en 0 (Vbias de 2.5V)
   x = x - 512;
+
   // Aplicar filtro RC
   y = y + alpha * (x - y);
+
   sampleToSend = (int)(y + 512); // Recentrar para enviar valor entre 0-1023
-  readyToSend = true; // Señalamos que hay dato listo
+  readyToSend = true; //  dato listo
   digitalWrite(12,LOW);
 }
+
 ```
+---
+
 
 ## Imagenes
 
