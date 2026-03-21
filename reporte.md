@@ -12,12 +12,17 @@ bitacora:
 
 ## Descripcion del sistema
 
-Sistema basado en microcontrolador. Entrada: señal de Audio tomada de PC
-Frecuencia de muestreo, periodo de muestreo Ts = 1 ms
-Salida de datos por serial 115200, 8n1.
+* Entrada: señal de Audio tomada de PC
+* Salida de datos por serial @ 115.2Kbps, 8n1.
+* Periodo de muestreo Ts = 1 ms
+    * *Proceso en tiempo real a 1 KHz*
+* Sistema basado en microcontrolador. 
+
 
 **Acondicionamiento de señal**
 
+Acoplamiento señal analogica de audio 
+*(Tratamiento antes de entrar a uControlador)*
 
 ```bash 
               +5V
@@ -27,7 +32,7 @@ Salida de datos por serial 115200, 8n1.
                |
                │    hacia el ADC
 Entrada ──||───●──> Vbias (~2.5V) 
-audio     10uF |    entrada a uControlador
+audio     10uF |    Entrada a uControlador
                │
              [R2 4.5k]
                │
@@ -35,7 +40,7 @@ audio     10uF |    entrada a uControlador
 ```
 
 * El capacitor de 10 µF bloquea el componente DC de la señal de audio.
-* El divisor R1–R2 (4.5k + 4.5k) genera Voltaje Vbias =  2.5VDC.
+* El divisor R1||R2 *(4.5k || 4.5k)* genera Voltaje **Vbias =  2.5 VDC**
 * El audio queda *montado* sobre nivel Vbias.
 * Desde el punto de vista de la señal de audio, el audio ve un pasa altas.
     * Frecuencia de corte vista por la señal. Fc=1/(2πRC)
@@ -56,21 +61,23 @@ audio     10uF |    entrada a uControlador
 * Frecuencia de **muestreo** fijada por Interrupion de timer
  a **1KHhz**
 
-**Generacion de archivo de audio chirp.wav en Julia**
+**Generacion de archivo de audio chirp.wav en Julia: chirp.jl**
 
-Este codigo genera una señal de audio para ejercitar
-el emulador, se trata de una chirp escalonada (con silencios) para barrer frecuencia y demostrar la funcionalidad de un RC emulado en uControlador.
+Chirp escalonada (con silencios) para barrer frecuencia con el fin de demostrar la funcionalidad de un RC emulado en uControlador. Audible desde cualquier reproductor.
 
 ```python
 using WAV
-using Plots
 
 #Generar el chirp con silencios entre cada frecuencia
-gr()
 fs = 44100
+
+#Vector de frecuencias en  la señal chirp:
 frecuencias = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-# duración del silencio (20 ms)
+
+#Duración del silencio (20 ms) entre freq
 silencio = zeros(Int(fs * 0.02))
+
+#Genera chirp
 chirp_signal = vcat([
     vcat(
         sin.(2π * fn .* (0:1/fs:(4/fn - 1/fs))),
@@ -79,15 +86,73 @@ chirp_signal = vcat([
     for fn in frecuencias
 ]...)
 
-# vector de tiempo global
-t = (0:length(chirp_signal)-1) ./ fs
 
 # guardar archivo WAV
 wavwrite(chirp_signal, "chirp.wav", Fs=fs)
 ```
+---
 
 
-**Filtro RC en Julia: y[n] = y[n-1] + alpha * (x[n] - y[n-1])**
+## Filtro RC en lenguaje julia rc.jl
+
+Un RC es un filtro pasa bajas de primer orden
+```c
+                 R=1000;     C=.100uF
+x(entrada)-> ---/\/\/\/\---| |-----GND
+          -> i=Cy' ->     ^
+                          |
+                          y(Vout)
+```                          
+Si:
+y = voltage Vout de capacitor
+
+
+La corriende de la rama es 
+
+
+i = Cy’
+
+
+x = voltaje | audio de entrada , *Por Kirchhoff:*
+
+```c
+x = RCy’ + y
+```
+
+Reordenando: 
+   RCy'=x-y o bien:
+
+   ```c
+   y'=(x-y)/RC          //(ecuacion 1)
+   ```
+
+   Por otro lado, la derivada es:
+
+   ```c
+   y'=(y[n-1]-y[n])/dt //(ecuacion 2)
+```
+   P ej. Para una frecuencia de muestreo fs de 1Khz
+   *(1000 muestras / sec)*
+   
+   ```c
+   dt=1/fs  //( 1 milisegundo)
+   ```
+   igualando ecuaciones 1 y 2:
+
+   ```c
+   y' = (y[n] +  x[n])   / RC       
+   y' = (y[n] -  y[n-1]) / dt 
+   ```
+   Haciendo cambio de variable **alpha** con:
+   
+   ```c
+   alpha = dt/(RC+dt)
+   ```
+
+   **alpha**
+
+   * Versión discreta de la frecuencia de corte
+   * Encapsula frecuencia de corte y muestreo
 
 ```python
 using WAV
@@ -95,7 +160,11 @@ using WAV
 # Leer archivo
 x, fs = wavread("chirp.wav")
 
-# Parámetros RC
+# Vin ── R ──┬── Vout
+#            |
+#            C
+#            |
+#           GND
 fc = 40.0
 RC = 1 / (2π * fc)
 T = 1 / fs
@@ -107,45 +176,57 @@ y[1] = x[1]
 
 
 for n in 2:length(x)
+    #rc();
     y[n] = y[n-1] + alpha * (x[n] - y[n-1])
+    #traducir a lenguaje C...
 end
 
 # Guardar WAV
-wavwrite(y, "filtered.wav", Fs=fs)
+wavwrite(y, "chirp_despues_de_filtro_rc.wav", Fs=fs)
 ```
 
 ---
 
-**Codigo C de RC**
-**y[n] = y[n-1] + alpha * (x[n] - y[n-1])**
+## Codigo C de RC (version tiempo real)
 
-Solo se muestra la ISR ejecutada cada 1 ms
+El siguiente codigo
+muestra la (interrupcion) / ISR .
+*Rutina de tiempo real*
+
+Ejecutada deterministicamente 
+(hard real time)
+cada 1 ms:
+
+**Prueba de concepto**
 
 ```c
-ISR(TIMER1_COMPA_vect)
+#define V_BIAS (512) //ADC de 10bits
+isr_1ms()
 {
-  static unsigned char signal = 0;
   // Filtro RC
   static float y = 0.0;
-  const float alpha = 0.2;
+  static float alpha = 0.2;
 
   // Alternar pin para medir con analizador lógico
   // Tick de sistema de tiempo real
-  signal = !signal;
-  digitalWrite(LED_BUILTIN, signal ? HIGH : LOW);
+  ToggleLedISR_D0();
 
-  digitalWrite(12,HIGH);
-  // Leer ADC
-  x = analogRead(pinADC);
-  //centrar en 0 (Vbias de 2.5V)
-  x = x - 512;
-
-  // Aplicar filtro RC
-  y = y + alpha * (x - y);
-
-  sampleToSend = (int)(y + 512); // Recentrar para enviar valor entre 0-1023
-  readyToSend = true; //  dato listo
-  digitalWrite(12,LOW);
+  //Mide tiempo de ejecucion:
+  Set_D0_High();
+  {
+     // Leer ADC
+     x = analogRead(pinADC);
+   
+     // Centrar en 0 (Vbias de 2.5V)
+     x = x - V_BIAS;
+   
+     // Aplicar filtro RC
+     y = y + alpha * (x - y);
+   
+     sampleToSend = (int)(y + V_BIAS); // Recentrar para enviar    valor entre 0-1023
+     readyToSend = true; //  dato listo
+  }
+  Set_D0_Low();
 }
 
 ```
