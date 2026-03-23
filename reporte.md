@@ -112,7 +112,6 @@ La corriende de la rama es
 
 i = Cy’
 
-
 x = voltaje | audio de entrada , *Por Kirchhoff:*
 
 ```c
@@ -128,26 +127,21 @@ Reordenando:
 
    Por otro lado, la derivada es:
 
-   ```c
-   y'=(y[n-1]-y[n])/dt //(ecuacion 2)
+```c
+   y'=(y[n]-y[n-1])/dt //(ecuacion 2)
 ```
-   P ej. Para una frecuencia de muestreo fs de 1Khz
-   *(1000 muestras / sec)*
-   
-   ```c
-   dt=1/fs  //( 1 milisegundo)
-   ```
-   igualando ecuaciones 1 y 2:
 
-   ```c
-   y' = (y[n] +  x[n])   / RC       
-   y' = (y[n] -  y[n-1]) / dt 
-   ```
-   Haciendo cambio de variable **alpha** con:
-   
-   ```c
-   alpha = dt/(RC+dt)
-   ```
+
+Igualando ecuaciones 1 y 2:
+
+```c
+y[n]-y[n-1] = (dt/RC) (x[n] - y[n])
+```
+con 
+
+```c
+alpha = dt/(RC+dt)
+```
 
    **alpha**
 
